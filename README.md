@@ -52,6 +52,8 @@ The complete catalog is an object with `schema_version`, `data_version`, `genera
 
 `schema_version` starts at `1.0.0` and describes the contract. `data_version` starts with `sha256-` and identifies catalog content; it is independent of schema versions. A new fetch timestamp alone must not create a new content version. Release snapshots retain previously published content.
 
+`diff.json` compares the current publication with its predecessor. Its `updated` lists identify changed model/provider facts; separate `provenance_only` lists identify records whose source revision changed while their normalized facts stayed the same.
+
 Unknowns are meaningful data. Missing capabilities, prices, developer attribution, protocol details, or endpoints are not synthesized. Capabilities use `supported`, `unsupported`, and `unknown`: an explicit unopposed source claim is retained, while contradictory explicit claims resolve to `unknown` and appear in `conflicts`. Missing source values remain unknown; differences in modality lists remain visible in the observations and conflict fields. `supported` therefore means a reported or documented claim, not a successful inference test. A listed price of zero can mean included subscription usage or a placeholder; `zero_requires_verification` must never be interpreted as a verified free service.
 
 ## Sources and MiMo
