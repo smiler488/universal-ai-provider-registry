@@ -1,0 +1,708 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smiler488.github.io/universal-ai-provider-registry/v1/schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "data_version": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "kind": {
+      "enum": [
+        "catalog",
+        "models",
+        "developers",
+        "providers",
+        "deployments",
+        "provider",
+        "diff",
+        "mimo-report"
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/model"
+      }
+    },
+    "developers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/developer"
+      }
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/provider"
+      }
+    },
+    "deployments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/deployment"
+      }
+    },
+    "provider": {
+      "$ref": "#/$defs/provider"
+    },
+    "report": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "data_version",
+    "generated_at",
+    "kind",
+    "sources"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "source": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "license": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "url",
+        "sha256",
+        "license",
+        "verification"
+      ],
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "developer_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "identity_status": {
+          "enum": [
+            "registry_reported",
+            "officially_documented",
+            "unknown"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "developer_id",
+        "identity_status",
+        "source_ids"
+      ],
+      "additionalProperties": false
+    },
+    "developer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string"
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "verification",
+        "source_ids"
+      ],
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "plan": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/endpoint"
+          }
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "region",
+        "plan",
+        "endpoints",
+        "source_ids"
+      ],
+      "additionalProperties": false
+    },
+    "endpoint": {
+      "type": "object",
+      "properties": {
+        "base_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "protocol": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "base_url",
+        "protocol",
+        "source_id",
+        "verification"
+      ],
+      "additionalProperties": false
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "provider_id": {
+          "type": "string"
+        },
+        "provider_model_id": {
+          "type": "string"
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string"
+        },
+        "availability": {
+          "enum": [
+            "listed",
+            "removed_from_source"
+          ]
+        },
+        "lifecycle": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "reasoning": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "vision": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "audio_input": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "audio_output": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "video_input": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "image_generation": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "video_generation": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "tool_calling": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "structured_output": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "streaming": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "embedding": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "reasoning",
+            "vision",
+            "audio_input",
+            "audio_output",
+            "video_input",
+            "image_generation",
+            "video_generation",
+            "tool_calling",
+            "structured_output",
+            "streaming",
+            "embedding"
+          ],
+          "additionalProperties": false
+        },
+        "pricing_status": {
+          "enum": [
+            "unknown",
+            "reported",
+            "conflicting",
+            "zero_requires_verification"
+          ]
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/observation"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "provider_id",
+        "provider_model_id",
+        "model_id",
+        "verification",
+        "availability",
+        "lifecycle",
+        "capabilities",
+        "pricing_status",
+        "conflicts",
+        "observations"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "source_record_id": {
+          "type": "string"
+        },
+        "verification": {
+          "enum": [
+            "registry_reported",
+            "officially_documented"
+          ]
+        },
+        "presence": {
+          "enum": [
+            "listed",
+            "removed_from_source"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "reasoning": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "vision": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "audio_input": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "audio_output": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "video_input": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "image_generation": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "video_generation": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "tool_calling": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "structured_output": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "streaming": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            },
+            "embedding": {
+              "enum": [
+                "supported",
+                "unsupported",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "reasoning",
+            "vision",
+            "audio_input",
+            "audio_output",
+            "video_input",
+            "image_generation",
+            "video_generation",
+            "tool_calling",
+            "structured_output",
+            "streaming",
+            "embedding"
+          ],
+          "additionalProperties": false
+        },
+        "input_modalities": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "output_modalities": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "context_window": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "max_output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "pricing": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "lifecycle": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_record_id",
+        "verification",
+        "presence",
+        "name",
+        "capabilities",
+        "input_modalities",
+        "output_modalities",
+        "context_window",
+        "max_output_tokens",
+        "pricing",
+        "lifecycle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "catalog"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "models",
+          "developers",
+          "providers",
+          "deployments"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "models"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "models"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "developers"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "developers"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "providers"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "providers"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "deployments"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "deployments"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "provider"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "provider",
+          "models",
+          "deployments"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "diff"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "report"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "mimo-report"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "report"
+        ]
+      }
+    }
+  ]
+}
