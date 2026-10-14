@@ -20,7 +20,7 @@ class SmokeTests(unittest.TestCase):
         for name in smoke.CORE:
             (self.directory / name).write_text('{"data_version":"test"}\n')
         (self.directory / 'provider-models').mkdir()
-        (self.directory / 'provider-models/xiaomi.json').write_text('{"kind":"provider"}\n')
+        (self.directory / 'provider-models/example-provider.json').write_text('{"kind":"provider"}\n')
         (self.directory / 'source-snapshots').mkdir()
         (self.directory / 'source-snapshots/test.json.gz').write_bytes(b'compressed-public-snapshot')
         self.headers = {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*',
@@ -38,10 +38,10 @@ class SmokeTests(unittest.TestCase):
                 patch.object(smoke, 'read_response', side_effect=self.response), redirect_stdout(output):
             self.assertEqual(smoke.main(), 0)
         report = json.loads(output.getvalue())
-        self.assertEqual(report['xiaomi_files'], ['provider-models/xiaomi.json'])
+        self.assertEqual(report['provider_file_count'], 1)
         self.assertEqual(report['passed_files'], 6)
 
-    def test_old_provider_path_cannot_satisfy_xiaomi_check(self):
+    def test_old_provider_path_cannot_satisfy_provider_check(self):
         (self.directory / 'provider-models').rename(self.directory / 'providers')
         with patch('sys.argv', ['smoke', '--base', 'https://example.org/v1', '--directory', str(self.directory)]), \
                 redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):

@@ -14,15 +14,22 @@
       "format": "date-time"
     },
     "kind": {
-      "enum": [
-        "catalog",
-        "models",
-        "developers",
-        "providers",
-        "deployments",
-        "provider",
-        "diff",
-        "mimo-report"
+      "anyOf": [
+        {
+          "enum": [
+            "catalog",
+            "models",
+            "developers",
+            "providers",
+            "deployments",
+            "provider",
+            "diff"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*-report$"
+        }
       ]
     },
     "sources": {
@@ -694,7 +701,7 @@
       "if": {
         "properties": {
           "kind": {
-            "const": "mimo-report"
+            "pattern": "-report$"
           }
         }
       },

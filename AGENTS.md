@@ -13,7 +13,7 @@ For simple but large repetitive work, including bulk translation, renaming, or r
 - `data/`: explicitly reviewed identity/evidence inputs.
 - `public/v1/`: generated current JSON documents and per-provider documents.
 - `public/v1/source-snapshots/`: intentionally published compressed public inputs, with verified reuse terms and source hashes, for reproducible builds.
-- `docs/`: source/license audit and MiMo coverage notes.
+- `docs/`: source/license audit and general data-contract notes.
 - `examples/`: small clients that read the published JSON.
 - `tests/`: focused tests of source parsing, normalization, provenance, and release behavior.
 - `.cache/`: local working fetch cache; do not commit this directory or secrets. The selected published snapshots above are distinct from this working cache.
@@ -37,7 +37,7 @@ For an offline build, use `python -m registry build` followed by validation. A m
 4. Use `null` or the schema's explicit unknown status for missing facts. Do not invent endpoints, protocols, prices, context limits, capabilities, availability, or developer attribution.
 5. Zero prices require interpretation. Subscription/included-use zeros are not verified free API access. Preserve `zero_requires_verification` where applicable.
 6. A source's presence in two related exports is not independent confirmation. Keep source-specific coverage and count definitions explicit.
-7. MiMo changes must be checked against official Xiaomi evidence and both imported catalog families. Record the date and source scope; retain unresolved differences.
+7. Provider-specific corrections must be checked against applicable official evidence and imported catalogs. Record the review date and deployment scope; retain unresolved differences. Keep examples and project documentation representative of the general registry.
 8. Check source licenses and applicable reuse terms before adding or copying material. Preserve required notices. MIT applies to original repository work, not automatically to all upstream content.
 
 ## Safety and publication
@@ -54,6 +54,6 @@ For an offline build, use `python -m registry build` followed by validation. A m
 
 ## Maintenance and reporting
 
-Update README and CHANGELOG for contract/operational changes. Update the source audit for new endpoints or license findings, and the MiMo review for material coverage changes. Distinguish verified results, upstream assertions, unresolved issues, and planned work.
+Update README and CHANGELOG for contract/operational changes. Update the source audit for new endpoints or license findings, and `data/reviewed-evidence.json` for reviewed factual corrections. Distinguish verified results, upstream assertions, unresolved issues, and planned work.
 
 Check failed scheduled runs and release freshness. GitHub schedules may be delayed or disabled after inactivity; do not promise an unattended service-level guarantee. When work is blocked, leave reproducible code and a precise blocker rather than claiming deployment is complete.

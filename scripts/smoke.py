@@ -99,10 +99,9 @@ def main() -> int:
     files = sorted(p for p in directory.rglob('*') if p.is_file())
     if any(p.is_symlink() for p in files):
         parser.error('Local snapshot must not contain symlinks')
-    xiaomi_files = [p for p in files if p.parent.name == 'provider-models' and
-                   ('xiaomi' in p.name.lower() or 'mimo' in p.name.lower()) and p.suffix == '.json']
-    if not xiaomi_files:
-        parser.error('No Xiaomi/MiMo provider shard exists in the local snapshot')
+    provider_files = [p for p in files if p.parent == directory / 'provider-models' and p.suffix == '.json']
+    if not provider_files:
+        parser.error('No provider shard exists under provider-models/ in the local snapshot')
     reports, failures = [], []
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         pending = {pool.submit(check_file, args.base, directory, p, args.attempts, args.retry_delay): p for p in files}
@@ -112,7 +111,7 @@ def main() -> int:
             except Exception as error:
                 failures.append(str(error))
     result = {'base_url': args.base.rstrip('/'), 'checked_files': len(files), 'passed_files': len(reports),
-              'xiaomi_files': [p.relative_to(directory).as_posix() for p in xiaomi_files],
+              'provider_file_count': len(provider_files),
               'failures': sorted(failures), 'files': sorted(reports, key=lambda item: item['path'])}
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)

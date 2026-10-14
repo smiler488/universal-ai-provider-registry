@@ -34,17 +34,20 @@ def fixtures():
             'providerPricing': {}, 'upstreamPricing': {},
         },
     }
-    official = {
+    reviewed = {'sources': [{
+        'source_id': 'example-official',
+        'provider_id': 'example', 'provider_name': 'Example Provider',
+        'developer_id': 'example-lab',
+        'identity_provider_ids': ['example', 'example-plan'],
         'checked_at': '2026-10-14', 'refresh_policy': 'manual-review-required',
-        'base_url': 'https://api.xiaomimimo.com/v1',
-        'model_list': ['mimo-v2.5-asr'],
+        'base_url': 'https://api.example.test/v1',
         'models': [{
-            'id': 'mimo-v2.5-asr',
+            'id': 'speech-one', 'developer_id': 'example-lab',
             'capabilities': {'input_modalities': ['audio'], 'output_modalities': ['text']},
             'lifecycle': {'status': 'documented'},
         }],
-    }
-    return data, official
+    }]}
+    return data, reviewed
 
 
 def dep(catalog, provider='lab', model='model-one'):
@@ -54,10 +57,10 @@ def dep(catalog, provider='lab', model='model-one'):
 
 class NormalizationTests(unittest.TestCase):
     def setUp(self):
-        self.data, self.official = fixtures()
+        self.data, self.reviewed = fixtures()
 
     def test_omitted_capabilities_and_absent_prices_remain_unknown(self):
-        result = normalize(self.data, self.official)
+        result = normalize(self.data, self.reviewed)
         row = dep(result)
         self.assertEqual(set(row['capabilities'].values()), {'unknown'})
         self.assertEqual(row['pricing_status'], 'unknown')
@@ -67,7 +70,7 @@ class NormalizationTests(unittest.TestCase):
     def test_explicit_boolean_disagreement_is_unknown_with_both_claims(self):
         self.data['models-dev']['lab']['models']['model-one']['reasoning'] = True
         self.data['openclaw']['models'][0]['reasoning'] = False
-        row = dep(normalize(self.data, self.official))
+        row = dep(normalize(self.data, self.reviewed))
         self.assertEqual(row['capabilities']['reasoning'], 'unknown')
         self.assertIn('capabilities.reasoning', row['conflicts'])
         self.assertEqual({o['capabilities']['reasoning'] for o in row['observations']},
@@ -83,7 +86,7 @@ class NormalizationTests(unittest.TestCase):
                 'cost': {'input': 0, 'output': 0},
             }},
         }
-        row = dep(normalize(self.data, self.official), 'voice-plan', 'voice-one')
+        row = dep(normalize(self.data, self.reviewed), 'voice-plan', 'voice-one')
         self.assertEqual(row['capabilities']['audio_output'], 'supported')
         self.assertEqual(row['capabilities']['audio_input'], 'unknown')
         self.assertEqual(row['capabilities']['reasoning'], 'unsupported')
@@ -94,7 +97,7 @@ class NormalizationTests(unittest.TestCase):
         for status in ('unknown', 'unavailable'):
             with self.subTest(status=status):
                 self.data['openclaw']['models'][0]['pricing'] = {'status': status}
-                row = dep(normalize(self.data, self.official))
+                row = dep(normalize(self.data, self.reviewed))
                 self.assertIn(row['pricing_status'], ('unknown', 'unavailable'))
                 claim = next(o for o in row['observations'] if o['source_id'].startswith('openclaw:'))
                 self.assertEqual(claim['pricing']['raw']['status'], status)
@@ -105,7 +108,7 @@ class NormalizationTests(unittest.TestCase):
                 'id': pid, 'name': pid,
                 'models': {'brand/model': {'id': 'brand/model', 'name': 'Example'}},
             }
-        result = normalize(self.data, self.official)
+        result = normalize(self.data, self.reviewed)
         first = dep(result, 'relay-a', 'brand/model')
         second = dep(result, 'relay-b', 'brand/model')
         self.assertNotEqual(first['model_id'], second['model_id'])
@@ -119,28 +122,74 @@ class NormalizationTests(unittest.TestCase):
             'id': 'developer/real-model', 'name': 'Real model',
         }
         self.data['models-dev']['lab']['models']['model-one']['canonical_model_id'] = 'developer/real-model'
-        row = dep(normalize(self.data, self.official))
+        row = dep(normalize(self.data, self.reviewed))
         self.assertEqual(row['model_id'], 'developer/real-model')
         self.assertEqual(len(row['observations']), 2)
 
-    def test_xiaomi_like_provider_name_does_not_grant_official_identity(self):
-        self.data['models-dev']['xiaomi-impostor'] = {
-            'id': 'xiaomi-impostor', 'name': 'Unreviewed relay',
-            'models': {'mimo-v2.5-asr': {'id': 'mimo-v2.5-asr', 'name': 'MiMo'}},
+    def test_similar_provider_name_does_not_grant_reviewed_identity(self):
+        self.data['models-dev']['example-impostor'] = {
+            'id': 'example-impostor', 'name': 'Unreviewed relay',
+            'models': {'speech-one': {'id': 'speech-one', 'name': 'Speech'}},
         }
-        result = normalize(self.data, self.official)
-        row = dep(result, 'xiaomi-impostor', 'mimo-v2.5-asr')
+        result = normalize(self.data, self.reviewed)
+        row = dep(result, 'example-impostor', 'speech-one')
         model = next(m for m in result['models'] if m['id'] == row['model_id'])
         self.assertEqual(model['identity_status'], 'unknown')
         self.assertIsNone(model['developer_id'])
 
+    def test_multiple_reviewed_sources_keep_providers_and_developers_distinct(self):
+        another = copy.deepcopy(self.reviewed['sources'][0])
+        another.update({
+            'source_id': 'another-official',
+            'provider_id': 'another', 'provider_name': 'Another Provider',
+            'developer_id': 'another-lab',
+            'identity_provider_ids': ['another', 'another-plan'],
+            'base_url': 'https://api.another.example.test/v1',
+        })
+        another['models'][0]['developer_id'] = 'another-lab'
+        self.reviewed['sources'].append(another)
+        result = normalize(self.data, self.reviewed)
+        indexed_models = {m['id']: m for m in result['models']}
+        indexed_providers = {p['id']: p for p in result['providers']}
+        evidence_ids = {s['id'] for s in result['sources']}
+        for provider, developer in (('example', 'example-lab'), ('another', 'another-lab')):
+            row = dep(result, provider, 'speech-one')
+            self.assertEqual(row['model_id'], developer + '/speech-one')
+            self.assertEqual(indexed_models[row['model_id']]['developer_id'], developer)
+            self.assertEqual(row['verification'], 'officially_documented')
+            self.assertEqual(row['capabilities']['audio_input'], 'supported')
+            self.assertEqual(row['capabilities']['audio_output'], 'unknown')
+            self.assertTrue(set(indexed_providers[provider]['source_ids']) <= evidence_ids)
+        self.assertNotEqual(dep(result, 'example', 'speech-one')['model_id'],
+                            dep(result, 'another', 'speech-one')['model_id'])
+
+    def test_only_reviewed_provider_aliases_share_documented_identity(self):
+        self.data['models-dev']['example-plan'] = {
+            'id': 'example-plan', 'name': 'Example Plan',
+            'models': {'speech-one': {'id': 'speech-one', 'name': 'Speech'}},
+        }
+        result = normalize(self.data, self.reviewed)
+        row = dep(result, 'example-plan', 'speech-one')
+        self.assertEqual(row['model_id'], 'example-lab/speech-one')
+        # Identity evidence does not turn a separate plan's serving claims into
+        # officially tested or documented plan capabilities.
+        self.assertEqual(row['verification'], 'registry_reported')
+        self.assertEqual(row['capabilities']['audio_input'], 'unknown')
+
+    def test_empty_reviewed_sources_adds_no_provider_or_hardcoded_model(self):
+        result = normalize(self.data, {'sources': []})
+        self.assertEqual({p['id'] for p in result['providers']}, {'lab'})
+        self.assertEqual({m['id'] for m in result['models']}, {'lab/model-one'})
+        self.assertEqual({d['id'] for d in result['developers']}, {'lab'})
+        self.assertEqual(len(result['deployments']), 1)
+
     def test_successful_disappearance_retains_tombstone_and_source_evidence(self):
         self.data['models-dev']['lab']['models']['gone'] = {'id': 'gone', 'name': 'Former model'}
-        previous = normalize(self.data, self.official)
+        previous = normalize(self.data, self.reviewed)
         before = copy.deepcopy(previous)
         old_row = dep(previous, 'lab', 'gone')
         del self.data['models-dev']['lab']['models']['gone']
-        current = normalize(self.data, self.official, previous)
+        current = normalize(self.data, self.reviewed, previous)
         row = dep(current, 'lab', 'gone')
         self.assertEqual(row['availability'], 'removed_from_source')
         self.assertEqual(row['verification'], 'unverified')
@@ -151,9 +200,9 @@ class NormalizationTests(unittest.TestCase):
 
     def test_partial_source_disappearance_does_not_remove_other_claim(self):
         self.data['openclaw']['models'].append({'provider': 'lab', 'id': 'other', 'name': 'Other'})
-        previous = normalize(self.data, self.official)
+        previous = normalize(self.data, self.reviewed)
         self.data['openclaw']['models'] = self.data['openclaw']['models'][1:]
-        row = dep(normalize(self.data, self.official, previous))
+        row = dep(normalize(self.data, self.reviewed, previous))
         self.assertEqual(row['availability'], 'listed')
         present = {o['source_id'].split(':')[0]: o['presence'] for o in row['observations']}
         self.assertEqual(present, {'models-dev': 'listed', 'openclaw': 'removed_from_source'})
@@ -215,9 +264,9 @@ class PublicationTests(unittest.TestCase):
         self.before_cwd = Path.cwd()
         self.root = Path(self.tmp.name)
         os.chdir(self.root)
-        self.data, self.official = fixtures()
+        self.data, self.reviewed = fixtures()
         Path('data').mkdir()
-        Path('data/mimo-official.json').write_bytes(encoded(self.official))
+        Path('data/reviewed-evidence.json').write_bytes(encoded(self.reviewed))
         Path('licenses').mkdir()
         Path('licenses/Fixture-MIT.txt').write_text('Test license fixture\n')
         self.output = Path('public/v1')

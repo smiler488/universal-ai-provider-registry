@@ -2,7 +2,23 @@
 
 An evidence-preserving public registry of AI models, their developers, providers, and deployments. It imports public catalogs, keeps disagreements and unknowns visible, and publishes validated JSON through GitHub Pages. No model API keys or paid inference calls are required.
 
-Repository: [smiler488/universal-ai-provider-registry](https://github.com/smiler488/universal-ai-provider-registry) · [Actions](https://github.com/smiler488/universal-ai-provider-registry/actions) · [source and license audit](docs/SOURCES.md) · [MiMo coverage review](docs/MIMO.md)
+Repository: [smiler488/universal-ai-provider-registry](https://github.com/smiler488/universal-ai-provider-registry) · [Actions](https://github.com/smiler488/universal-ai-provider-registry/actions) · [source and license audit](docs/SOURCES.md)
+
+## Use the registry
+
+**Start with [catalog.json](https://smiler488.github.io/universal-ai-provider-registry/v1/catalog.json).** Open the link and save the file, or download it with the command below. This single JSON file contains the complete registry; no repository clone, GitHub account, or API key is needed.
+
+```sh
+curl --fail --location \
+  https://smiler488.github.io/universal-ai-provider-registry/v1/catalog.json \
+  --output catalog.json
+```
+
+This is a directory of model metadata. Use it to list models, find providers, and inspect source claims. It does not run a model or provide an inference API. Calling a listed model requires the provider's own service, credentials, and applicable terms; a catalog entry alone does not verify account access or invocation success.
+
+To download just one provider, open [providers.json](https://smiler488.github.io/universal-ai-provider-registry/v1/providers.json), choose a record from its `providers` array, and copy that record's exact `id`. Replace `<provider-id>` in `https://smiler488.github.io/universal-ai-provider-registry/v1/provider-models/<provider-id>.json` with that ID. Use the ID rather than the display name.
+
+For programmatic use, JSON files have an envelope: metadata such as `data_version` sits beside the record arrays. For example, models are under `catalog.models`, not at the document root. Join `deployment.model_id` to `model.id`, `deployment.provider_id` to `provider.id`, and `model.developer_id` to `developer.id`. A null `developer_id` means the attribution is unknown. `provider_model_id` is the provider's own identifier; it is distinct from the registry's model identity.
 
 ## Public JSON
 
@@ -16,18 +32,10 @@ The synchronization workflow publishes the following endpoints. Check the latest
 | [providers.json](https://smiler488.github.io/universal-ai-provider-registry/v1/providers.json) | Serving organizations or services |
 | [deployments.json](https://smiler488.github.io/universal-ai-provider-registry/v1/deployments.json) | Provider-specific model offerings and source observations |
 | [schema.json](https://smiler488.github.io/universal-ai-provider-registry/v1/schema.json) | JSON Schema used for validation |
-| [mimo-report.json](https://smiler488.github.io/universal-ai-provider-registry/v1/mimo-report.json) | Source-by-source Xiaomi coverage and reviewed official evidence |
-| [provider-models/xiaomi.json](https://smiler488.github.io/universal-ai-provider-registry/v1/provider-models/xiaomi.json) | Ordinary Xiaomi API provider, with model and deployment records |
 
 Per-provider documents use `v1/provider-models/<provider-id>.json`. Obtain the exact ID from `providers.json`; do not substitute a provider's display name. Each document contains `provider`, `models`, `deployments`, and `sources` with the same release metadata. Consult the full catalog when resolving developer references.
 
-```sh
-curl --fail --location \
-  https://smiler488.github.io/universal-ai-provider-registry/v1/catalog.json \
-  --output catalog.json
-```
-
-Runnable clients: [Python](examples/read_catalog.py), [JavaScript](examples/read_catalog.mjs), and [shell](examples/read_catalog.sh). They retrieve public metadata only. A deployment record does not establish that an endpoint accepts requests, that a model is available to your account, or that an advertised price is currently payable.
+Runnable clients: [Python](examples/read_catalog.py), [JavaScript](examples/read_catalog.mjs), and [shell](examples/read_catalog.sh). Save an example file and run it locally; cloning the repository is optional. They retrieve public metadata only.
 
 ```sh
 python examples/read_catalog.py
@@ -35,7 +43,7 @@ node examples/read_catalog.mjs
 sh examples/read_catalog.sh
 ```
 
-The Python example uses the standard library; JavaScript requires Node.js 18 or newer; the shell example requires `curl` and `python3`. Each accepts an optional catalog URL for testing a local HTTP preview.
+The Python example uses the standard library; JavaScript requires Node.js 18 or newer; the shell example requires `curl` and `python3`. Each accepts an optional catalog URL. The Python and JavaScript examples list sample provider IDs and accept a second argument containing an exact provider ID selected from `providers.json`; they then show up to ten deployment/model/developer joins for that provider.
 
 ## Data contract
 
@@ -56,11 +64,11 @@ The complete catalog is an object with `schema_version`, `data_version`, `genera
 
 Unknowns are meaningful data. Missing capabilities, prices, developer attribution, protocol details, or endpoints are not synthesized. Capabilities use `supported`, `unsupported`, and `unknown`: an explicit unopposed source claim is retained, while contradictory explicit claims resolve to `unknown` and appear in `conflicts`. Missing source values remain unknown; differences in modality lists remain visible in the observations and conflict fields. `supported` therefore means a reported or documented claim, not a successful inference test. A listed price of zero can mean included subscription usage or a placeholder; `zero_requires_verification` must never be interpreted as a verified free service.
 
-## Sources and MiMo
+## Sources
 
-The first version imports [Models.dev's full API](https://models.dev/api.json?type=all), its [full catalog](https://models.dev/catalog.json?type=all), OpenClaw Catalog V2, and reviewed public MiMo documentation. The two Models.dev exports are related upstream views, not independent corroboration. Exact source URLs, license findings, attribution, and limitations are in [docs/SOURCES.md](docs/SOURCES.md).
+The registry imports [Models.dev's full API](https://models.dev/api.json?type=all), its [full catalog](https://models.dev/catalog.json?type=all), OpenClaw Catalog V2, and selected facts from reviewed official documentation. The two Models.dev exports are related upstream views, not independent corroboration. Exact source URLs, license findings, attribution, and limitations are in [docs/SOURCES.md](docs/SOURCES.md).
 
-The [MiMo review](docs/MIMO.md) records coverage and disagreements between Xiaomi's official documentation and imported catalogs. Model existence, serving provider, model ID, API compatibility, price, and capability are separate assertions. An official documentation reference does not automatically verify every downstream provider's implementation. Reviewed mappings require maintenance when official documentation changes.
+The [reviewed evidence file](data/reviewed-evidence.json) preserves dated factual observations and their original documentation links. Model existence, serving provider, model ID, API compatibility, price, and capability are separate assertions. An official documentation reference does not automatically verify every downstream provider's implementation. Reviewed mappings require maintenance when official documentation changes.
 
 ## Build and validate
 
@@ -90,7 +98,7 @@ GitHub Actions runs synchronization at 00:23, 06:23, 12:23, and 18:23 UTC, and s
 
 For a downloadable archive, run **Actions → Release immutable data snapshot → Run workflow** on `main`. It validates the committed catalog and publishes a content-addressed `data-…` release with a ZIP and `SHA256SUMS`. The workflow leaves an existing release of the same content unchanged. This manual archive release is separate from the scheduled Pages publication.
 
-The workflow runs on GitHub and does not require Dot, Hermes, Codex, or another agent to stay online. It uses the job's short-lived `GITHUB_TOKEN`, with write permissions limited to jobs that commit releases or deploy Pages. Pull-request validation must not receive those write permissions. Do not add provider credentials to the repository or workflow.
+The workflow runs on GitHub without requiring an external agent to stay online. It uses the job's short-lived `GITHUB_TOKEN`, with write permissions limited to jobs that commit releases or deploy Pages. Pull-request validation must not receive those write permissions. Do not add provider credentials to the repository or workflow.
 
 GitHub schedules can be delayed; scheduled workflows in public repositories can be disabled after 60 days without repository activity. This is a best-effort update service, not a permanent unattended availability guarantee. See [GitHub's schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). Check failed runs and data freshness, re-enable disabled schedules, and rerun a failed sync after fixing its cause.
 
@@ -98,6 +106,6 @@ If publication is blocked, inspect repository **Settings → Pages**, workflow t
 
 ## License and versioning
 
-Original code and documentation use the [MIT license](LICENSE). Imported material retains its upstream attribution and applicable terms; the repository license does not relicense third-party data or documentation. Read [docs/SOURCES.md](docs/SOURCES.md) before redistributing source material. The reviewed, licensed public snapshots are intentionally published; the working `.cache/` directory and any credentials stay out of Git. Full Xiaomi documentation pages are not redistributed.
+Original code and documentation use the [MIT license](LICENSE). Imported material retains its upstream attribution and applicable terms; the repository license does not relicense third-party data or documentation. Read [docs/SOURCES.md](docs/SOURCES.md) before redistributing source material. The reviewed, licensed public snapshots are intentionally published; the working `.cache/` directory and any credentials stay out of Git. Official documentation pages without an identified open reuse license are not redistributed in full.
 
 See [CHANGELOG.md](CHANGELOG.md) for contract and software changes. Source coverage is bounded by what the current importers and reviewed mappings can verify; the project name is not a claim of exhaustive or real-time coverage.

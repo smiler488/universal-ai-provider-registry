@@ -7,7 +7,7 @@ Initial review: **2026-10-14**. Counts below describe that review snapshot; late
 | OpenClaw Catalog V2 | [catalog.json](https://catalog.openclaw.ai/models/v2/catalog.json) | 1,028 model/provider rows; 43 providers | [MIT](https://github.com/openclaw/catalog/blob/main/LICENSE) |
 | Models.dev full provider catalog | [api.json?type=all](https://models.dev/api.json?type=all) | 8,853 model/provider rows; 228 providers | [MIT](https://github.com/anomalyco/models.dev/blob/dev/LICENSE) |
 | Models.dev full combined catalog | [catalog.json?type=all](https://models.dev/catalog.json?type=all) | Same provider records, plus 552 provider-independent model records | Same Models.dev MIT notice |
-| Xiaomi official documentation | [reviewed factual observations](../data/mimo-official.json) | Nine models in the documented model-list example; selected audio and lifecycle facts | No open documentation license identified; full pages are not redistributed |
+| Selected official documentation | [reviewed factual observations](../data/reviewed-evidence.json) | Dated model-list, capability, endpoint and lifecycle observations, with provider-specific scope | License status retained per source; pages without an identified open license are not redistributed in full |
 
 ## Interpretation
 
@@ -19,11 +19,11 @@ OpenClaw V2 model prices include an explicit status. In the reviewed snapshot, 8
 
 Sources are related: OpenClaw itself can hydrate metadata or pricing from Models.dev. Agreement between them is not independent confirmation. Preserve each observation and its source; expose differences instead of silently combining capability sets. Standalone OpenClaw pricing entries are not, by themselves, evidence for a serving deployment.
 
-## Xiaomi official supplement
+## Reviewed official evidence
 
-The supplement is a dated manual review. Automated source synchronization must not advance its `checked_at` date. A maintainer must read the cited official page and revise the facts before changing that date. The documented list is an **example response**, not an authenticated live inventory. The official `/v1/models` endpoint requires an API key; this project does not need or submit one. [List Models](https://mimo.mi.com/docs/en-US/api/model/list-models)
+The [evidence file](../data/reviewed-evidence.json) stores dated manual reviews and their original source links. Automated synchronization must not advance a review's `checked_at` date. A maintainer must read the cited official material and review the recorded facts before changing that date. A model-list example in documentation remains an example response, not an authenticated live inventory. This registry does not submit API keys or perform authenticated model-list requests.
 
-Selected facts carry specific evidence URLs. Unknown values stay null. The supplement is limited to the ordinary Xiaomi API; it must not grant capabilities or entitlement to regional Token Plan endpoints. See [the MiMo audit](MIMO.md).
+Selected facts carry specific evidence URLs and apply only to the identified provider or deployment. Unknown values stay null. Documentation for an ordinary API must not grant capabilities or entitlement to subscription plans, regional endpoints, or resellers. Capability descriptions, endpoint paths, lifecycle dates and pricing units retain their original scope; no endpoints or token-price conversions are inferred from broad compatibility claims.
 
 ## Reuse and attribution
 

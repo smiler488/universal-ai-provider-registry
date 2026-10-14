@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "schema_version": 1,
+      "checked_at": "2026-10-14",
+      "source_type": "official-documentation-review",
+      "refresh_policy": "manual-review-required",
+      "provider_id": "xiaomi",
+      "base_url": "https://api.xiaomimimo.com/v1",
+      "base_url_source_id": "mimo-model-list-docs",
+      "sources": [
+        {
+          "id": "mimo-model-list-docs",
+          "url": "https://mimo.mi.com/docs/en-US/api/model/list-models",
+          "checked_at": "2026-10-14",
+          "license_status": "no_open_license_identified",
+          "evidence_kind": "official_documentation_example"
+        },
+        {
+          "id": "mimo-asr-docs",
+          "url": "https://mimo.mi.com/docs/en-US/api/audio/Speech-Recognition",
+          "checked_at": "2026-10-14",
+          "license_status": "no_open_license_identified",
+          "evidence_kind": "official_api_reference"
+        },
+        {
+          "id": "mimo-tts-docs",
+          "url": "https://mimo.mi.com/docs/en-US/api/audio/tts",
+          "checked_at": "2026-10-14",
+          "license_status": "no_open_license_identified",
+          "evidence_kind": "official_api_reference"
+        },
+        {
+          "id": "mimo-deprecation-docs",
+          "url": "https://mimo.mi.com/docs/zh-CN/updates/deprecate",
+          "checked_at": "2026-10-14",
+          "license_status": "no_open_license_identified",
+          "evidence_kind": "official_lifecycle_notice"
+        },
+        {
+          "id": "mimo-pricing-docs",
+          "url": "https://mimo.mi.com/docs/en-US/price/pay-as-you-go",
+          "checked_at": "2026-10-14",
+          "license_status": "no_open_license_identified",
+          "evidence_kind": "official_pricing_reference"
+        }
+      ],
+      "models": [
+        {
+          "id": "mimo-v2.5",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": null,
+            "output_modalities": null
+          },
+          "api_endpoints": [],
+          "pricing": null,
+          "lifecycle": {
+            "status": "deprecation_scheduled",
+            "replacement_model_id": "mimo-v2.6-flash",
+            "automatic_routing_at": "2026-10-14T18:00:00+08:00",
+            "retirement_at": "2026-10-21T10:00:00+08:00",
+            "source_id": "mimo-deprecation-docs"
+          },
+          "source_ids": [
+            "mimo-model-list-docs",
+            "mimo-deprecation-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.5-asr",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": [
+              "audio"
+            ],
+            "output_modalities": [
+              "text"
+            ]
+          },
+          "api_endpoints": [
+            {
+              "method": "POST",
+              "path": "/chat/completions",
+              "url": "https://api.xiaomimimo.com/v1/chat/completions",
+              "source_id": "mimo-asr-docs"
+            }
+          ],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs",
+            "mimo-asr-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.5-pro",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": null,
+            "output_modalities": null
+          },
+          "api_endpoints": [],
+          "pricing": null,
+          "lifecycle": {
+            "status": "deprecation_scheduled",
+            "replacement_model_id": "mimo-v2.6-pro",
+            "automatic_routing_at": "2026-10-14T18:00:00+08:00",
+            "retirement_at": "2026-10-21T10:00:00+08:00",
+            "source_id": "mimo-deprecation-docs"
+          },
+          "source_ids": [
+            "mimo-model-list-docs",
+            "mimo-deprecation-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.5-tts",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": [
+              "text"
+            ],
+            "output_modalities": [
+              "audio"
+            ]
+          },
+          "api_endpoints": [
+            {
+              "method": "POST",
+              "path": "/chat/completions",
+              "url": "https://api.xiaomimimo.com/v1/chat/completions",
+              "source_id": "mimo-tts-docs"
+            }
+          ],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs",
+            "mimo-tts-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.5-tts-voiceclone",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": [
+              "text",
+              "audio"
+            ],
+            "output_modalities": [
+              "audio"
+            ]
+          },
+          "api_endpoints": [
+            {
+              "method": "POST",
+              "path": "/chat/completions",
+              "url": "https://api.xiaomimimo.com/v1/chat/completions",
+              "source_id": "mimo-tts-docs"
+            }
+          ],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs",
+            "mimo-tts-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.5-tts-voicedesign",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": [
+              "text"
+            ],
+            "output_modalities": [
+              "audio"
+            ]
+          },
+          "api_endpoints": [
+            {
+              "method": "POST",
+              "path": "/chat/completions",
+              "url": "https://api.xiaomimimo.com/v1/chat/completions",
+              "source_id": "mimo-tts-docs"
+            }
+          ],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs",
+            "mimo-tts-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.6-flash",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": null,
+            "output_modalities": null
+          },
+          "api_endpoints": [],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.6-pro",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": null,
+            "output_modalities": null
+          },
+          "api_endpoints": [],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs"
+          ]
+        },
+        {
+          "id": "mimo-v2.6-pro-ultraspeed",
+          "developer_id": "xiaomi",
+          "presence": "documented",
+          "capabilities": {
+            "input_modalities": null,
+            "output_modalities": null
+          },
+          "api_endpoints": [],
+          "pricing": null,
+          "lifecycle": {
+            "status": "documented"
+          },
+          "source_ids": [
+            "mimo-model-list-docs"
+          ]
+        }
+      ],
+      "model_list": [
+        "mimo-v2.5",
+        "mimo-v2.5-asr",
+        "mimo-v2.5-pro",
+        "mimo-v2.5-tts",
+        "mimo-v2.5-tts-voiceclone",
+        "mimo-v2.5-tts-voicedesign",
+        "mimo-v2.6-flash",
+        "mimo-v2.6-pro",
+        "mimo-v2.6-pro-ultraspeed"
+      ],
+      "lifecycle_notices": [
+        {
+          "model_ids": [
+            "mimo-v2-pro",
+            "mimo-v2-omni",
+            "mimo-v2-flash",
+            "mimo-v2-tts"
+          ],
+          "status": "retired",
+          "retirement_at": "2026-06-30T00:00:00+08:00",
+          "source_id": "mimo-deprecation-docs"
+        }
+      ],
+      "pricing_notes": [
+        {
+          "scope": "mimo-v2.5-asr",
+          "billing_dimension": "input_audio_duration",
+          "billing_unit": "hour",
+          "source_id": "mimo-pricing-docs"
+        },
+        {
+          "scope": [
+            "mimo-v2.5-tts",
+            "mimo-v2.5-tts-voiceclone",
+            "mimo-v2.5-tts-voicedesign"
+          ],
+          "status": "limited_time_free",
+          "valid_until": null,
+          "source_id": "mimo-pricing-docs"
+        }
+      ],
+      "limitations": [
+        "This file is a dated human-reviewed selection of factual documentation observations, not a live authenticated inventory or inference test.",
+        "Official HTML is not redistributed and no open license is claimed for Xiaomi documentation.",
+        "Documented presence does not prove account, region, quota, token-plan entitlement, or current live availability.",
+        "Null means unverified. No provider-wide protocol, price, context window, tool use, or license is inferred.",
+        "Listed API endpoint paths are relative to base_url; source URLs are preserved.",
+        "Audio input for voice cloning means the documented reference voice sample, not unrestricted audio comprehension.",
+        "Official pay-as-you-go facts do not automatically apply to the separate CN, Singapore or Europe token plans.",
+        "Manual-review-required observations keep their original checked_at across automatic catalog synchronizations."
+      ],
+      "source_id": "xiaomi-official-review",
+      "provider_name": "Xiaomi",
+      "developer_id": "xiaomi",
+      "identity_provider_ids": [
+        "xiaomi",
+        "xiaomi-token-plan",
+        "xiaomi-token-plan-cn",
+        "xiaomi-token-plan-sgp",
+        "xiaomi-token-plan-ams"
+      ]
+    }
+  ]
+}

@@ -25,7 +25,7 @@ def source_record(name, data, previous):
     prior = next((s for s in previous.get('sources', []) if s['id'] == sid), None)
     if prior:
         return prior
-    return {'id': sid, 'name': name, 'url': SOURCES.get(name, 'https://github.com/smiler488/universal-ai-provider-registry/blob/main/data/mimo-official.json'), 'sha256': hashlib.sha256(encoded(data)).hexdigest(), 'license': 'MIT' if name in SOURCES else 'selected factual observations; official documentation not relicensed', 'verification': 'registry_reported' if name in SOURCES else 'officially_documented'}
+    return {'id': sid, 'name': name, 'url': SOURCES.get(name, 'https://github.com/smiler488/universal-ai-provider-registry/blob/main/data/reviewed-evidence.json'), 'sha256': hashlib.sha256(encoded(data)).hexdigest(), 'license': 'MIT' if name in SOURCES else 'selected factual observations; official documentation not relicensed', 'verification': 'registry_reported' if name in SOURCES else 'officially_documented'}
 
 
 def states(row, source):
@@ -86,21 +86,41 @@ def summarize(dep):
     dep['conflicts'] = sorted(conflicts)
 
 
-def normalize(data, official, previous=None):
+def reviewed_sources(reviewed):
+    sources = {}
+    for source in reviewed.get('sources', []):
+        key = source['source_id']
+        if not re.fullmatch(r'[a-zA-Z0-9_.-]+', key) or key in sources or key in SOURCES:
+            raise ValueError('Invalid or duplicate reviewed source ID')
+        sources[key] = source
+    return sources
+
+
+def normalize(data, reviewed, previous=None):
     previous = previous or {}
-    source_map = {name: source_record(name, value, previous) for name,value in {**data, 'xiaomi-official-review': official}.items()}
+    supplements = reviewed_sources(reviewed)
+    source_map = {name: source_record(name, value, previous) for name,value in {**data, **supplements}.items()}
     models, developers, providers, deployments = {}, {}, {}, {}
     canonical = data['models-dev-canonical']['models']
     md = data['models-dev']
-    official_ids = {r['id'] for r in official['models']}
-    official_ids |= {mid for notice in official.get('lifecycle_notices',[]) for mid in notice['model_ids']}
+    identity_map = {}
+    for source in supplements.values():
+        identities = {r['id']:r.get('developer_id', source['developer_id']) for r in source['models']}
+        identities.update({mid:source['developer_id'] for notice in source.get('lifecycle_notices',[]) for mid in notice['model_ids']})
+        for pid in source.get('identity_provider_ids', [source['provider_id']]):
+            for mid, developer in identities.items():
+                key = (pid, mid)
+                canonical_id = developer + '/' + mid
+                if key in identity_map and identity_map[key] != canonical_id:
+                    raise ValueError('Conflicting reviewed identity mapping')
+                identity_map[key] = canonical_id
 
     def identity(pid, mid, row=None):
         candidate = (row or {}).get('canonical_model_id')
         if candidate in canonical:
             return candidate, 'registry_reported'
-        if pid in ('xiaomi','xiaomi-token-plan','xiaomi-token-plan-cn','xiaomi-token-plan-sgp','xiaomi-token-plan-ams') and mid in official_ids:
-            return 'xiaomi/' + mid, 'officially_documented'
+        if (pid, mid) in identity_map:
+            return identity_map[(pid,mid)], 'officially_documented'
         peer = md.get(pid, {}).get('models', {}).get(mid, {})
         if peer.get('canonical_model_id') in canonical:
             return peer['canonical_model_id'], 'registry_reported'
@@ -162,20 +182,25 @@ def normalize(data, official, previous=None):
         pid = row['provider']
         provider(pid,pid,sid,protocol=oc.get('providers',{}).get(pid,{}).get('api'))
         deploy(pid,row,observation(row,'openclaw',sid,pid + '/' + row['id']))
-    sid = source_map['xiaomi-official-review']['id']
-    provider('xiaomi','Xiaomi',sid,official.get('base_url'))['endpoints'][-1]['verification'] = 'officially_documented'
-    for row in official['models']:
-        translated = {'id':row['id'], 'modalities':{'input':row['capabilities']['input_modalities'], 'output':row['capabilities']['output_modalities']}, 'status':row['lifecycle']['status']}
-        obs = observation(translated,'official',sid,row['id'])
-        obs['verification'] = 'officially_documented'
-        deploy('xiaomi',translated,obs)
-
-    for notice in official.get('lifecycle_notices', []):
-        for mid in notice['model_ids']:
-            row = {'id':mid, 'status':notice['status']}
-            obs = observation(row,'official',sid,'lifecycle/' + mid)
+    for source_name, supplement in sorted(supplements.items()):
+        sid = source_map[source_name]['id']
+        pid = supplement['provider_id']
+        p = provider(pid,supplement.get('provider_name',pid),sid,supplement.get('base_url'))
+        for endpoint in p['endpoints']:
+            if endpoint['source_id'] == sid:
+                endpoint['verification'] = 'officially_documented'
+        for row in supplement['models']:
+            caps = row.get('capabilities', {})
+            translated = {'id':row['id'], 'name':row.get('name',row['id']), 'modalities':{'input':caps.get('input_modalities'), 'output':caps.get('output_modalities')}, 'status':row.get('lifecycle',{}).get('status','unknown')}
+            obs = observation(translated,'official',sid,row['id'])
             obs['verification'] = 'officially_documented'
-            deploy('xiaomi',row,obs)
+            deploy(pid,translated,obs)
+        for notice in supplement.get('lifecycle_notices', []):
+            for mid in notice['model_ids']:
+                row = {'id':mid, 'status':notice['status']}
+                obs = observation(row,'official',sid,'lifecycle/' + mid)
+                obs['verification'] = 'officially_documented'
+                deploy(pid,row,obs)
 
     # Successful omission is not retirement. Keep absent claims and entities;
     # transport failure aborts before this function, retaining last valid release.
@@ -229,17 +254,6 @@ def diff_report(previous, current):
     report['removed_from_source'] = [d['id'] for d in current['deployments'] if d['availability']=='removed_from_source']
     report['conflicting_metadata'] = [d['id'] for d in current['deployments'] if d['conflicts']]
     return report
-
-
-def mimo_report(current, official):
-    rows = []
-    for model_id in sorted({d['provider_model_id'] for d in current['deployments'] if d['provider_id'].startswith('xiaomi')}):
-        evidence = []
-        for d in current['deployments']:
-            if d['provider_id'].startswith('xiaomi') and d['provider_model_id'] == model_id:
-                evidence.append({'provider_id':d['provider_id'], 'deployment_id':d['id'], 'conflicts':d['conflicts'], 'observations':[{'source':o['source_id'].split(':')[0], 'presence':o['presence']} for o in d['observations']]})
-        rows.append({'model_id':model_id, 'official_documented':model_id in official['model_list'], 'deployments':evidence})
-    return {'rows':rows, 'official_review':official, 'note':'Missing from a registry does not mean unsupported. PAYG documentation does not establish token-plan entitlement. No authenticated API or inference tests performed.'}
 
 
 def validate(directory=OUT):
@@ -338,8 +352,9 @@ def build(online=False, output=OUT, cache=Path('.cache')):
                 if p.exists():
                     (cache/(name+'.json')).write_bytes(gzip.decompress(p.read_bytes()))
     data=load_sources(online,cache)
-    official=json.loads(Path('data/mimo-official.json').read_text())
-    content=normalize(data,official,previous)
+    reviewed=json.loads(Path('data/reviewed-evidence.json').read_text())
+    supplements=reviewed_sources(reviewed)
+    content=normalize(data,reviewed,previous)
     # Fail closed on unexpected mass disappearance even when the HTTP response is 200.
     if previous:
         old={d['id'] for d in previous['deployments'] if d['availability']=='listed'}
@@ -374,7 +389,6 @@ def build(online=False, output=OUT, cache=Path('.cache')):
             mids={d['model_id'] for d in deps}
             write('provider-models/'+p['id']+'.json',{**meta,'kind':'provider','provider':p,'models':[m for m in content['models'] if m['id'] in mids],'deployments':deps})
         write('diff.json',{**meta,'kind':'diff','report':diff_report(previous,content)})
-        write('mimo-report.json',{**meta,'kind':'mimo-report','report':mimo_report(content,official)})
         write('schema.json',SCHEMA)
         for source in content['sources']:
             rel=Path('source-snapshots')/(source['id'].replace(':','-')+'.json.gz')
@@ -383,7 +397,7 @@ def build(online=False, output=OUT, cache=Path('.cache')):
             if (output/rel).exists():
                 shutil.copyfile(output/rel,dest)
             else:
-                value=official if source['name']=='xiaomi-official-review' else data[source['name']]
+                value=supplements[source['name']] if source['name'] in supplements else data[source['name']]
                 dest.write_bytes(gzip.compress(encoded(value),mtime=0))
         # License notices travel with downloadable data, not only the source repo.
         license_dir=temp/'licenses'
@@ -407,6 +421,6 @@ def build(online=False, output=OUT, cache=Path('.cache')):
         if temp.exists():
             shutil.rmtree(temp)
     (output.parent/'.nojekyll').touch()
-    (output.parent/'index.html').write_text('<!doctype html><meta charset="utf-8"><title>Universal AI Provider Registry</title><h1>Universal AI Provider Registry</h1><p>Public model metadata with source evidence and explicit unknowns.</p><ul>'+''.join(f'<li><a href="v1/{name}">{name}</a></li>' for name in ['catalog.json','models.json','providers.json','deployments.json','mimo-report.json','schema.json','checksums.sha256'])+'</ul><p><a href="https://github.com/smiler488/universal-ai-provider-registry">Documentation and source</a></p>')
+    (output.parent/'index.html').write_text('<!doctype html><meta charset="utf-8"><title>Universal AI Provider Registry</title><h1>Universal AI Provider Registry</h1><p>Public model metadata with source evidence and explicit unknowns.</p><ul>'+''.join(f'<li><a href="v1/{name}">{name}</a></li>' for name in ['catalog.json','models.json','providers.json','deployments.json','schema.json','checksums.sha256'])+'</ul><p><a href="https://github.com/smiler488/universal-ai-provider-registry">Documentation and source</a></p>')
     print('Published local data version '+version)
     return True

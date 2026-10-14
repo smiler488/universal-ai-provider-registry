@@ -11,6 +11,6 @@ Notices were retrieved from [OpenClaw's LICENSE](https://raw.githubusercontent.c
 
 OpenClaw can incorporate observations from Models.dev and other public sources. Retaining those source names does not claim that this project independently tested their assertions.
 
-Selected Xiaomi facts in [data/mimo-official.json](data/mimo-official.json) are a dated review of identified official documentation. No open license was identified for those pages, and this project does not redistribute their full text or HTML. Source links and the factual scope of each observation are preserved. Xiaomi names and trademarks belong to their respective owners.
+Selected facts in [data/reviewed-evidence.json](data/reviewed-evidence.json) are dated reviews of identified official documentation. Source links, license status, and the factual scope of each observation are preserved. Pages without an identified open reuse license are not redistributed in full text or HTML. Provider and model names and trademarks belong to their respective owners.
 
 These data licenses do not grant access to any provider API, license a model's weights, or establish rights to referenced datasets or artwork. A catalog's open-weights flag and a service's advertised free promotion do not replace their own license or terms. Unknown model/service licenses remain unknown.
