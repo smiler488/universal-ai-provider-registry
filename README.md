@@ -6,6 +6,15 @@ Repository: [smiler488/universal-ai-provider-registry](https://github.com/smiler
 
 ## Use the registry
 
+**One sentence for your AI**: paste the line below to any AI assistant (WorkBuddy, Claude Code, Codex, web chatbots with browsing), and it will learn how to query this registry:
+
+```text
+请根据 https://raw.githubusercontent.com/smiler488/universal-ai-provider-registry/main/install.md，使用 universal-ai-provider-registry 查询模型出处。
+```
+
+(An agent-facing access protocol lives in [install.md](install.md): which JSON to fetch, how records join, and what must not be invented.)
+
+
 **Start with [catalog.json](https://smiler488.github.io/universal-ai-provider-registry/v1/catalog.json).** Open the link and save the file, or download it with the command below. This single JSON file contains the complete registry; no repository clone, GitHub account, or API key is needed.
 
 ```sh
