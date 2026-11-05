@@ -11,7 +11,7 @@ from urllib.parse import quote, urlparse
 
 from jsonschema import Draft202012Validator, FormatChecker
 from .schema import SCHEMA, CAPS
-from .sources import SOURCES, encoded, digest, load_sources, check_source
+from .sources import SOURCES, encoded, digest, load_sources
 
 VERSION = '1.0.0'
 OUT = Path('public/v1')
