@@ -4,7 +4,7 @@ English | [中文](README.zh-CN.md)
 
 An evidence-preserving public registry of AI models, their developers, providers, and deployments. It imports public catalogs, keeps disagreements and unknowns visible, and publishes validated JSON through GitHub Pages. No model API keys or paid inference calls are required.
 
-I started it because questions like "who actually developed this model, and is this provider the original or a reseller?" kept coming up, and aggregator listings often merge or rename models without saying so. Here every claim keeps a link to where it came from, and anything not documented stays unknown instead of being guessed.
+Aggregator listings often merge or rename models without saying so, which makes "who developed this model, and is this provider the original or a reseller?" hard to answer. Here every claim keeps a link to where it came from, and anything not documented stays unknown instead of being guessed.
 
 Repository: [smiler488/universal-ai-provider-registry](https://github.com/smiler488/universal-ai-provider-registry) · [Actions](https://github.com/smiler488/universal-ai-provider-registry/actions) · [source and license audit](docs/SOURCES.md)
 

@@ -4,7 +4,7 @@
 
 一个保留证据来源的公开注册表，记录 AI 模型、模型开发者、服务商以及各服务商上的部署。它导入公开的模型目录，把来源之间的分歧和未知项如实保留，校验后的 JSON 通过 GitHub Pages 发布。整个过程不需要任何模型 API key，也不需要付费调用。
 
-起因是我经常碰到这类问题："这个模型到底是谁开发的？这个服务商是原厂还是转售？"聚合平台的列表常常把模型合并或改名，却不说明。在这个注册表里，每条说法都附带出处链接；没有文档依据的内容一律标记为"未知"，而不是去猜。
+聚合平台的列表常常把模型合并或改名却不加说明，"这个模型是谁开发的？这个服务商是原厂还是转售？"这类问题因此很难回答。在这个注册表里，每条说法都附带出处链接；没有文档依据的内容一律标记为"未知"，而不是去猜。
 
 仓库：[smiler488/universal-ai-provider-registry](https://github.com/smiler488/universal-ai-provider-registry) · [Actions](https://github.com/smiler488/universal-ai-provider-registry/actions) · [来源与许可审计](docs/SOURCES.md)
 
