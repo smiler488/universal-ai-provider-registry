@@ -1,6 +1,10 @@
 # Universal AI Provider Registry
 
+English | [中文](README.zh-CN.md)
+
 An evidence-preserving public registry of AI models, their developers, providers, and deployments. It imports public catalogs, keeps disagreements and unknowns visible, and publishes validated JSON through GitHub Pages. No model API keys or paid inference calls are required.
+
+Aggregator listings often merge or rename models without saying so, which makes "who developed this model, and is this provider the original or a reseller?" hard to answer. Here every claim keeps a link to where it came from, and anything not documented stays unknown instead of being guessed.
 
 Repository: [smiler488/universal-ai-provider-registry](https://github.com/smiler488/universal-ai-provider-registry) · [Actions](https://github.com/smiler488/universal-ai-provider-registry/actions) · [source and license audit](docs/SOURCES.md)
 
@@ -117,4 +121,4 @@ If publication is blocked, inspect repository **Settings → Pages**, workflow t
 
 Original code and documentation use the [MIT license](LICENSE). Imported material retains its upstream attribution and applicable terms; the repository license does not relicense third-party data or documentation. Read [docs/SOURCES.md](docs/SOURCES.md) before redistributing source material. The reviewed, licensed public snapshots are intentionally published; the working `.cache/` directory and any credentials stay out of Git. Official documentation pages without an identified open reuse license are not redistributed in full.
 
-See [CHANGELOG.md](CHANGELOG.md) for contract and software changes. Source coverage is bounded by what the current importers and reviewed mappings can verify; the project name is not a claim of exhaustive or real-time coverage.
+Maintained by Liangchao Deng (邓良超). See [CHANGELOG.md](CHANGELOG.md) for contract and software changes. Source coverage is bounded by what the current importers and reviewed mappings can verify; the project name is not a claim of exhaustive or real-time coverage.
